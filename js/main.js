@@ -7,8 +7,8 @@ const desktopDir = `${homeDir}/Desktop`;
 function createWindow() {
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1800,
+    height: 1600,
     webPreferences: {
       nodeIntegration: true,
     },
@@ -19,22 +19,7 @@ function createWindow() {
 
   // Open the DevTools.
   win.webContents.openDevTools();
-
-  // let menu = Menu.buildFromTemplate([
-  //   {
-  //     label: 'Pages',
-  //     submenu: [
-  //       {
-  //         label: 'Business report',
-  //         click() {
-  //           shell.openExternal('https://github.com/vfxpipeline/system-info/blob/master/main.js');
-  //         },
-  //       },
-  //     ],
-  //   },
-  // ]);
-
-  // Menu.setApplicationMenu(menu);
+  
 }
 
 // This method will be called when Electron has finished
