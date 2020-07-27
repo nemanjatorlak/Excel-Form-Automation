@@ -1,11 +1,11 @@
 {
-  "businessReportFilePath": "C:\\Users\\BojanaHome\\Desktop\\BusinessReport-23-06-20.csv",
-  "kongWeeklyFilePath": "C:\\Users\\BojanaHome\\Desktop\\KONG AU Weekly Report 7.6.20 - 13.6.20.xlsx",
-  "kongInventoryFilePath": "C:\\Users\\BojanaHome\\Desktop\\inventory kong.csv",
-  "formulaSportsWeeklyFilePath": "C:\\Users\\BojanaHome\\Desktop\\excel automatic update electron\\Formula Sports AU Weekly Report 24.5.20 - 30.5.20 original.xlsx",
-  "formulaSportsInventoryFilePath": "C:\\Users\\BojanaHome\\Desktop\\excel automatic update electron\\Formula Sports AU Weekly Report 24.5.20 - 30.5.20 original.xlsx",
-  "rapidLossWeeklyFilePath": "C:\\Users\\BojanaHome\\Desktop\\excel automatic update electron\\Rapid Loss AU Weekly Report 17.5.20 - 23.5.20.xlsx",
-  "rapidLossInventoryFilePath": "C:\\Users\\BojanaHome\\Desktop\\excel automatic update electron\\Rapid Loss AU Weekly Report 17.5.20 - 23.5.20.xlsx",
-  "skinPhysicsWeeklyFilePath": "C:\\Users\\BojanaHome\\Desktop\\excel automatic update electron\\Skin Physics AU Weekly Report 24.5.20 - 30.5.20.xlsx",
-  "skinPhysicsInventoryFilePath": "C:\\Users\\BojanaHome\\Desktop\\excel automatic update electron\\Skin Physics AU Weekly Report 24.5.20 - 30.5.20.xlsx"
+  "businessReportFilePath": "No file chosen",
+  "kongWeeklyFilePath": "No file chosen",
+  "kongInventoryFilePath": "No file chosen",
+  "formulaSportsWeeklyFilePath": "No file chosen",
+  "formulaSportsInventoryFilePath": "No file chosen",
+  "rapidLossWeeklyFilePath": "No file chosen",
+  "rapidLossInventoryFilePath": "No file chosen",
+  "skinPhysicsWeeklyFilePath": "No file chosen",
+  "skinPhysicsInventoryFilePath": "No file chosen"
 }
