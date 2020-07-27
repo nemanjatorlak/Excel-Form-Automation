@@ -11,130 +11,290 @@
 <body>
     <div class="container">
       <div id="header" class="col-12" style="background-image: linear-gradient(to left top, #00b16a, #009564, #00795a, #005e4d, #04443c); height: 50px;"></div>
-      <div class="row paddingBottom">
-        <div id="welcomeDiv" class="col-6 offset-3 ">
-          <div class="row">
-            <div id="welcomeText" class="col-12 text">Welcome</div>
-          </div>
-          <div class="row">
-            <svg id="line" version="1.1" preserveAspectRatio="xMidYMid meet" viewBox="0 0 905 20">
-                <path d="M 450 12 10 12" stroke-linejoin="round" fill="none" stroke-linecap="round" stroke="#e2e2e2" stroke-width="2"></path><path d="M 450 12 900 12" stroke-linejoin="round" fill="none" stroke-linecap="round" stroke="#e2e2e2" stroke-width="2"></path>
-            </svg>
-          </div>
-          <div class="row">
-              <div id="pleaseSelectUserText" class="col-12 text">Please upload required Excel files</div>
-          </div>
-        </div>
-      </div>
-       
       
-        <div class="row">
-          <div class="col-6">
-            <p>Select the business report file</p><br/>
+        <div class="row sector">
+          <div class='col-8 offset-2'>
+            <div class="row">
+              <div class="col-6">
+                <p>Select the business report file</p>
+              </div>
+            </div>
             <div class="row"> 
-              <div class="col-5">
+              <div class="col-4">
                 <button id="businessReportFile">Choose file</button>
               </div>
-              <div class="col-7" id="businessReportTitle"></div>
+              <div class="col-4" id="businessReportTitle"></div>
+              <div id="businessReportBtnDiv" class="col-2 btnDivClass">
+                <button class="button btn btn-success btn-md center-block" id="businessReportSubmit">Submit</button>
+              </div>
             </div>
-          </div>
-          <div id="businessReportBtnDiv" class="col-2">
-            <button class="button btn btn-success btn-md center-block" id="businessReportSubmit">Submit</button>
           </div>
         </div>
 
-        <div class="row">
+        <hr class="firstLine">
+
+        <div class="row sector title">
+          <h1>Kong</h1>
+        </div>
+ 
+        <div class="row sector">
           <div class="col-6">
-            <p>Select the Kong weekly report file</p><br/>
-            <div class="row"> 
-              <div id="kongBtnDiv" class="col-2">
+            <div class="row">
+              <div class="col-6">
+                <p>Select the Kong weekly report file</p>
+              </div>
+              <div class="col-6">
+                <p>File chosen:</p>
+              </div>
+            </div>
+            <div class="row fileRow"> 
+              <div id="kongBtnDiv" class="col-6 btnDivClass">
                 <button id="kongWeeklyFile">Choose file</button>
               </div>
-              <div class="col-7" id="kongWeeklyTitle"></div>
+              <div class="col-6" id="kongWeeklyTitle"></div>
+            </div>
+          </div>       
+
+          <div class="col-4 offset-2">
+            <div class="row inputTitleRow">
+              <div class="col-9">
+                <p>Actual Purchases Value for Kong:</p>
+              </div>
+            </div>
+            <div class="row"> 
+              <div id="actualPurchasesValueKongDiv" class="col-6">
+                <input id="actualPurchasesValueKong">
+              </div>
+            </div>
+            <div class="row inputTitleRow">
+              <div class="col-9">
+                <p>Units Purchased Value for Kong:</p>
+              </div>
+            </div>
+            <div class="row"> 
+              <div id="unitsPurchasedValueKongDiv" class="col-6">
+                <input id="unitsPurchasedValueKong">
+              </div>
             </div>
           </div>       
         </div>
 
-        <div class="row">
+        <div class="row sector">
           <div class="col-6">
-            <p>Select the Kong inventory file</p><br/>
+            <div class="row">
+              <div class="col-6">
+                <p>Select the Kong inventory file</p>
+              </div>
+              <div class="col-6">
+                <p>File chosen:</p>
+              </div>
+            </div>
             <div class="row"> 
-              <div class="col-5">
+              <div class="col-6">
                 <button id="kongInventoryFile">Choose file</button>
               </div>
-              <div class="col-7" id="kongInventoryTitle"></div>
+              <div class="col-6" id="kongInventoryTitle"></div>
             </div>
           </div>
         </div>
 
-        <div class="row">
+        <hr class="lineBreak">
+
+        <div class="row sector title">
+          <h1>Formula Sports</h1>
+        </div>
+
+        <div class="row sector">
           <div class="col-6">
-            <p>Select the Formula Sports weekly report file</p><br/>
-            <div class="row"> 
-              <div id="formulaSportsBtnDiv" class="col-2">
+            <div class="row">
+              <div class="col-6">
+                <p>Select the Formula Sports weekly report file</p>
+              </div>
+              <div class="col-6">
+                <p>File chosen:</p>
+              </div>
+            </div>
+            <div class="row fileRow"> 
+              <div id="formulaSportsBtnDiv" class="col-6 btnDivClass">
                 <button id="formulaSportsWeeklyFile">Choose file</button>
               </div>
-              <div class="col-7" id="formulaSportsWeeklyTitle"></div>
+              <div class="col-6" id="formulaSportsWeeklyTitle"></div>
             </div>
-          </div>
+          </div>       
+
+          <div class="col-4 offset-2">
+            <div class="row inputTitleRow">
+              <div class="col-9">
+                <p>Actual Purchases Value for Formula Sports:</p>
+              </div>
+            </div>
+            <div class="row"> 
+              <div id="actualPurchasesValueFormulaSportsDiv" class="col-6">
+                <input id="actualPurchasesValueFormulaSports">
+              </div>
+            </div>
+            <div class="row inputTitleRow">
+              <div class="col-9">
+                <p>Units Purchased Value for Formula Sports:</p>
+              </div>
+            </div>
+            <div class="row"> 
+              <div id="unitsPurchasedValueFormulaSportsDiv" class="col-6">
+                <input id="unitsPurchasedValueFormulaSports">
+              </div>
+            </div>
+          </div>       
         </div>
 
-        <div class="row">
+        <div class="row sector">
           <div class="col-6">
-            <p>Select the Formula Sports inventory file</p><br/>
+            <div class="row">
+              <div class="col-6">
+                <p>Select the Formula Sports inventory file</p>
+              </div>
+              <div class="col-6">
+                <p>File chosen:</p>
+              </div>
+            </div>
             <div class="row"> 
-              <div class="col-5">
+              <div class="col-6">
                 <button id="formulaSportsInventoryFile">Choose file</button>
               </div>
-              <div class="col-7" id="formulaSportsInventoryTitle"></div>
+              <div class="col-6" id="formulaSportsInventoryTitle"></div>
             </div>
           </div>
+        </div>
+
+        <hr class="lineBreak">
+
+        <div class="row sector title">
+          <h1>Rapid Loss</h1>
         </div>
         
-        <div class="row">
+        <div class="row sector">
           <div class="col-6">
-            <p>Select the Rapid Loss weekly report file</p><br/>
-            <div class="row"> 
-              <div id="rapidLossBtnDiv" class="col-2">
+            <div class="row">
+              <div class="col-6">
+                <p>Select the Rapid Loss weekly report file</p>
+              </div>
+              <div class="col-6">
+                <p>File chosen:</p>
+              </div>
+            </div>
+            <div class="row fileRow"> 
+              <div id="rapidLossBtnDiv" class="col-6 btnDivClass">
                 <button id="rapidLossWeeklyFile">Choose file</button>
               </div>
-              <div class="col-7" id="rapidLossWeeklyTitle"></div>
+              <div class="col-6" id="rapidLossWeeklyTitle"></div>
             </div>
-          </div>
+          </div>       
+
+          <div class="col-4 offset-2">
+            <div class="row inputTitleRow">
+              <div class="col-9">
+                <p>Actual Purchases Value for Rapid Loss:</p>
+              </div>
+            </div>
+            <div class="row"> 
+              <div id="actualPurchasesValueRapidLossDiv" class="col-6">
+                <input id="actualPurchasesValueRapidLoss">
+              </div>
+            </div>
+            <div class="row inputTitleRow">
+              <div class="col-9">
+                <p>Units Purchased Value for Rapid Loss:</p>
+              </div>
+            </div>
+            <div class="row"> 
+              <div id="unitsPurchasedValueRapidLossDiv" class="col-6">
+                <input id="unitsPurchasedValueRapidLoss">
+              </div>
+            </div>
+          </div>       
         </div>
 
-        <div class="row">
+        <div class="row sector">
           <div class="col-6">
-            <p>Select the Rapid Loss inventory file</p><br/>
+            <div class="row">
+              <div class="col-6">
+                <p>Select the Rapid Loss inventory file</p>
+              </div>
+              <div class="col-6">
+                <p>File chosen:</p>
+              </div>
+            </div>
             <div class="row"> 
-              <div class="col-5">
+              <div class="col-6">
                 <button id="rapidLossInventoryFile">Choose file</button>
               </div>
-              <div class="col-7" id="rapidLossInventoryTitle"></div>
+              <div class="col-6" id="rapidLossInventoryTitle"></div>
             </div>
-          </div>
-        </div>
-          
-        <div class="row">
-          <div class="col-6">
-            <p>Select the Skin Physics weekly report file</p><br/>
-            <div class="row"> 
-              <div id="skinPhysicsBtnDiv" class="col-2">
-                <button id="skinPhysicsWeeklyFile">Choose file</button>
-              </div>
-            </div>
-            <div class="col-7" id="skinPhysicsWeeklyTitle"></div>
           </div>
         </div>
 
-        <div class="row">
+        <hr class="lineBreak">
+
+        <div class="row sector title">
+          <h1>Skin Physics</h1>
+        </div>
+          
+        <div class="row sector">
           <div class="col-6">
-            <p>Select the Skin Physics inventory file</p><br/>
+            <div class="row">
+              <div class="col-6">
+                <p>Select the Skin Physics weekly report file</p>
+              </div>
+              <div class="col-6">
+                <p>File chosen:</p>
+              </div>
+            </div>
+            <div class="row fileRow"> 
+              <div id="skinPhysicsBtnDiv" class="col-6 btnDivClass">
+                <button id="skinPhysicsWeeklyFile">Choose file</button>
+              </div>
+              <div class="col-6" id="skinPhysicsWeeklyTitle"></div>
+            </div>
+          </div>       
+
+          <div class="col-4 offset-2">
+            <div class="row inputTitleRow">
+              <div class="col-9">
+                <p>Actual Purchases Value for Skin Physics:</p>
+              </div>
+            </div>
             <div class="row"> 
-              <div class="col-5">
+              <div id="actualPurchasesValueSkinPhysicsDiv" class="col-6">
+                <input id="actualPurchasesValueSkinPhysics">
+              </div>
+            </div>
+            <div class="row inputTitleRow">
+              <div class="col-9">
+                <p>Units Purchased Value for Skin Physics:</p>
+              </div>
+            </div>
+            <div class="row"> 
+              <div id="unitsPurchasedValueSkinPhysicsDiv" class="col-6">
+                <input id="unitsPurchasedValueSkinPhysics">
+              </div>
+            </div>
+          </div>       
+        </div>
+
+        <div class="row sector">
+          <div class="col-6">
+            <div class="row">
+              <div class="col-6">
+                <p>Select the Skin Physics inventory file</p>
+              </div>
+              <div class="col-6">
+                <p>File chosen:</p>
+              </div>
+            </div>
+            <div class="row"> 
+              <div class="col-6">
                 <button id="skinPhysicsInventoryFile">Choose file</button>
               </div>
-              <div class="col-7" id="skinPhysicsInventoryTitle"></div>
+              <div class="col-6" id="skinPhysicsInventoryTitle"></div>
             </div>
           </div>
         </div>
