@@ -1,0 +1,23 @@
+{
+  "name": "bokis-little-helper",
+  "productName": "Bombolino",
+  "version": "1.0.0",
+  "description": "automatic excel reports",
+  "main": "js/main.js",
+  "scripts": {
+    "start": "electron .",
+    "package-mac": "electron-packager . --overwrite --platform=darwin --arch=x64 --icon=assets/images/appIcon.png --prune=true --out=release-builds",
+    "package-win": "electron-packager . Bombolino --overwrite --asar=true --platform=win32 --arch=ia32 --icon=assets/images --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"Bombolino\"",
+    "package-linux": "electron-packager . electron-tutorial-app --overwrite --asar=true --platform=linux --arch=x64 --icon=assets/images/appIcon.png --prune=true --out=release-builds"
+  },
+  "author": "Nemanja Torlak",
+  "license": "ISC",
+  "dependencies": {
+    "electron": "^9.0.0",
+    "electron-packager": "^15.0.0",
+    "exceljs": "^3.9.0",
+    "fast-csv": "^4.3.0",
+    "iconv-lite": "^0.6.1",
+    "moment": "^2.27.0"
+  }
+}
