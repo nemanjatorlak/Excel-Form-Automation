@@ -1,7 +1,8 @@
 const Excel = require('exceljs');
 const { ipcRenderer } = require('electron');
 const fs = require('fs');
-const moment = require('moment');
+var iconv = require('iconv-lite');
+const { isNullOrUndefined } = require('util');
 
 let businessReportFile = document.getElementById('businessReportFile');
 let kongWeeklyFile = document.getElementById('kongWeeklyFile');
@@ -13,7 +14,30 @@ let rapidLossInventoryFile = document.getElementById('rapidLossInventoryFile');
 let skinPhysicsWeeklyFile = document.getElementById('skinPhysicsWeeklyFile');
 let skinPhysicsInventoryFile = document.getElementById('skinPhysicsInventoryFile');
 let businessReportSubmit = document.getElementById('businessReportSubmit');
+let actualPurchasesValueKong = document.getElementById('actualPurchasesValueKong');
+let unitsPurchasedValueKong = document.getElementById('unitsPurchasedValueKong');
+let actualPurchasesValueFormulaSports = document.getElementById('actualPurchasesValueFormulaSports');
+let unitsPurchasedValueFormulaSports = document.getElementById('unitsPurchasedValueFormulaSports');
+let actualPurchasesValueRapidLoss = document.getElementById('actualPurchasesValueRapidLoss');
+let unitsPurchasedValueRapidLoss = document.getElementById('unitsPurchasedValueRapidLoss');
+let actualPurchasesValueSkinPhysics = document.getElementById('actualPurchasesValueSkinPhysics');
+let unitsPurchasedValueSkinPhysics = document.getElementById('unitsPurchasedValueSkinPhysics');
 let year, month, saturday, yearAWeekAgo, monthAWeekAgo, sundayAWeekAgo;
+const monthValues = {
+  1: 'Jan',
+  2: 'Feb',
+  3: 'Mar',
+  4: 'Apr',
+  5: 'May',
+  6: 'June',
+  7: 'July',
+  8: 'Aug',
+  9: 'Sep',
+  10: 'Oct',
+  11: 'Nov',
+  12: 'Dec'
+}
+
 //let businessReportTitle, kongWeeklyTitle, formulaSportsWeeklyTitle, rapidLossWeeklyTitle, skinPhysicsWeeklyTitle;
 
 function getFileLocations() {
@@ -59,11 +83,18 @@ businessReportSubmit.addEventListener('click', async (event) => {
   }
 
   for (var file in weeklyFilePaths) {
-    if (file !== 'businessReportFilePath' && file === 'kongWeeklyFilePath') {
-
+    if (file !== 'businessReportFilePath') {
+      
+      function changeEncoding(path) {
+        var buffer = fs.readFileSync(path, {encoding: 'binary'});
+        var output = iconv.encode(iconv.decode(buffer, 'win1250'), "utf-8");
+        fs.writeFileSync(path + 'encoding.csv', output);
+      }
+      
+      changeEncoding(filePaths.businessReportFilePath);
 
       const businessReportWorkbook = new Excel.Workbook();
-      const businessReportWorksheet = await businessReportWorkbook.csv.readFile(filePaths.businessReportFilePath);
+      const businessReportWorksheet = await businessReportWorkbook.csv.readFile(filePaths.businessReportFilePath + 'encoding.csv');
 
       let SKUColumn = businessReportWorksheet.getColumn('D');
       let rowsToSplice = [];
@@ -107,7 +138,7 @@ businessReportSubmit.addEventListener('click', async (event) => {
         const inputWeeklyReportWorkbook = new Excel.Workbook();
         
         await inputWeeklyReportWorkbook.xlsx.readFile(filePath).then(async () => {
-          let AUSheetNameToCopy, lastWeekWorksheetName;
+          let AUSheetNameToCopy, lastWeekWorksheetName, newRowNumberAmazonData = 0;
           
           const outputWeeklyReportWorkbook = new Excel.Workbook();
           const inputInventoryWorkbook = new Excel.Workbook();
@@ -119,40 +150,51 @@ businessReportSubmit.addEventListener('click', async (event) => {
               const outputWeeklyReportWorksheet = outputWeeklyReportWorkbook.addWorksheet(worksheet.name);
 
               outputWeeklyReportWorksheet.properties = worksheet.properties;
+              outputWeeklyReportWorksheet.views = worksheet.views;
               outputWeeklyReportWorksheet.state = worksheet.state;
 
-              const columnsToCopy = ['Product',	'Manufacturer',	'SKU',	'ASIN',	'Part Number',	'List Price',	'Amazon Fulfilled',	'Merchant Fulfilled',	'Active',	'Do Not Order',
-                'Discontinued',	'Listing Working',	'Fulfillable Qty.',	'Unsellable Qty.',	'Reserved FC Processing Qty',	'Reserved FC Transfer QTY',	'Reserved Customer Order',
-                'Ordered Qty',	'Lindon Warehouse Qty.',	'Hebron Warehouse Qty.',	'Toronto Warehouse Qty.',	'Skullcandy Netherlands Warehouse Qty.',	'Venlo Warehouse Qty.',	
-                'Top Ideal Hong Kong Warehouse Qty.',	'Thrapston Warehouse Qty.',	'Melbourne Warehouse Qty.',	'UAE BS Warehouse Qty.',	'Dubai Warehouse Qty.',	'Inbound Qty',	
-                'Backorder Qty',	'Backorder Count',	'Wholesale Price'];
+              // const columnsToCopy = ['Product',	'Manufacturer',	'SKU',	'ASIN',	'Part Number',	'List Price',	'Amazon Fulfilled',	'Merchant Fulfilled',	'Active',	'Do Not Order',
+              //   'Discontinued',	'Listing Working',	'Fulfillable Qty.',	'Unsellable Qty.',	'Reserved FC Processing Qty',	'Reserved FC Transfer QTY',	'Reserved Customer Order',
+              //   'Ordered Qty',	'Lindon Warehouse Qty.',	'Hebron Warehouse Qty.',	'Toronto Warehouse Qty.',	'Skullcandy Netherlands Warehouse Qty.',	'Venlo Warehouse Qty.',	
+              //   'Top Ideal Hong Kong Warehouse Qty.',	'Thrapston Warehouse Qty.',	'Melbourne Warehouse Qty.',	'UAE BS Warehouse Qty.',	'Dubai Warehouse Qty.',	'Inbound Qty',	
+              //   'Backorder Qty',	'Backorder Count',	'Wholesale Price'];
 
               outputWeeklyReportWorksheet.getRow(1).model = worksheet.getRow(1).model;
 
-              for (let column in columnsToCopy){
+              //Copy the data from the inventory file into the inventory sheet
+              //The FNSKU column and all columns after Wholesale Price are not copied
+              outputWeeklyReportWorksheet.getRow(1).eachCell((cell, colNumber) => {
                 let columnToCopyIn, columnToCopyFrom; 
-                outputWeeklyReportWorksheet.getRow(1).eachCell((cell, colNumber) => {
+                let outputCell = cell, outputColNumber = colNumber;
+                inputInventoryWorksheet.getRow(1).eachCell((cell, colNumber) => {
+                  if (outputCell.value === cell.value) {
+                    columnToCopyIn = outputColNumber;
+                    columnToCopyFrom = colNumber;
 
-                  if (cell.value === columnsToCopy[column]){
-                    columnToCopyFrom = colNumber; 
-                    if (colNumber > 3) {
-                      columnToCopyIn = colNumber - 1;
-                    } else {
-                      columnToCopyIn = colNumber;
-                    }
+                    return;
                   }
                 });
 
                 inputInventoryWorksheet.getColumn(columnToCopyFrom).eachCell((cell, rowNumber) => {
-                  if(rowNumber > 1){
+                  if (cell.value === null) {
+                    return;
+                  } else if (rowNumber > 1) {
+                    if (inputInventoryWorksheet.getRow(1).getCell(columnToCopyFrom).value === 'List Price' || inputInventoryWorksheet.getRow(1).getCell(columnToCopyFrom).value === 'Wholesale Price'){
+                      outputWeeklyReportWorksheet.getRow(rowNumber).getCell(columnToCopyIn).value = parseFloat(cell.value.slice(1));
+                      outputWeeklyReportWorksheet.getRow(rowNumber).getCell(columnToCopyIn).numFmt = '$#0.00';
+                    } else {
                     outputWeeklyReportWorksheet.getRow(rowNumber).getCell(columnToCopyIn).value = cell.value;
-                    console.log(outputWeeklyReportWorksheet.getRow(rowNumber).getCell(columnToCopyIn).value)
+                    }
                   }
-                })
-              }
+                });
 
-              return;
-            } else if(worksheet.name.startsWith('SKU ')) {
+                if (outputWeeklyReportWorksheet.getColumn(columnToCopyIn).width !== undefined) {
+                  outputWeeklyReportWorksheet.getColumn(columnToCopyIn).width = worksheet.getColumn(columnToCopyIn).width;
+                } 
+              });
+
+            return;
+            } else if (worksheet.name.startsWith('SKU ')) {
               worksheet.removeConditionalFormatting(format => {
                 return format.rules[0].type !== 'cellIs';
               });
@@ -211,79 +253,144 @@ businessReportSubmit.addEventListener('click', async (event) => {
               lastWeekWorksheetName = 'AU Traffic ' + sundayAWeekAgo + '.' + (monthAWeekAgo + 1) + '.' + String(yearAWeekAgo).slice(0, 2) + ' - ' + saturday + '.' + (month + 1) + '.' + String(year).slice(0, 2);
 
               const lastWeekReportWorksheet = outputWeeklyReportWorkbook.addWorksheet();
-              lastWeekReportWorksheet.model = inputWeeklyReportWorkbook.getWorksheet(AUSheetNameToCopy).model;
               lastWeekReportWorksheet.state = inputWeeklyReportWorkbook.getWorksheet(AUSheetNameToCopy).state;
               lastWeekReportWorksheet.name = lastWeekWorksheetName;
-
-              businessReportWorksheet.spliceRows(2, 0, inputWeeklyReportWorkbook.getWorksheet(AUSheetNameToCopy).getRow(2));
+              //Copy the first two rows from the last week AU Traffic sheet
+              businessReportWorksheet.spliceRows(2, 0, [, 'TOTALS']);
+              let AUCellF2Summ = 0, AUCellF2Divider = 0, AUCellG2Sum = 0, AUCellFResult = 0, businessReportEmpty = true;
+             
+              if (businessReportWorksheet.getRow(3).getCell(1).value !== null ) {
+                  businessReportEmpty = false;
+              }
+              
               //Copy the business report data into the AU Traffic sheet
               businessReportWorksheet.eachRow((row, rowNumber) => {
-                let newRow = lastWeekReportWorksheet.getRow(rowNumber);
-                row.eachCell((cell, colNumber) => {
-                  let newCell = newRow.getCell(colNumber);
-                  if (colNumber === 6 && rowNumber > 1){
-                    newCell.value = parseInt(cell.value.slice(0, -1)) / 100;
-                    newCell.numFmt = '#0%'
-                  } else if (colNumber === 8 && rowNumber > 2){
-                    newCell.value = parseFloat(cell.value.slice(0, -1)) / 100;
-                    newCell.numFmt = '#0.00%'
-                  } else if (colNumber === 9 && rowNumber > 2){
-                    newCell.value = parseFloat(cell.value.slice(1));
-                    newCell.numFmt = '$#0.00'
-                  } else {
-                    newCell.value = cell.value;
-                    newCell.numFmt = cell.numFmt;
-                  }
-                });
+                if (rowNumber <= 2) {
+                  lastWeekReportWorksheet.getRow(rowNumber).model = inputWeeklyReportWorkbook.getWorksheet(AUSheetNameToCopy).getRow(rowNumber).model;
+                } else {
+                  let newRow = lastWeekReportWorksheet.getRow(rowNumber);
+                  row.eachCell((cell, colNumber) => {
+                    let newCell = newRow.getCell(colNumber);
+                    if (colNumber === 6 && rowNumber > 2){
+                      let newCellValue = parseInt(cell.value.slice(0, -1)) / 100;
+                      newCell.value = newCellValue;
+                      AUCellF2Summ += newCellValue;
+                      AUCellF2Divider ++;
+                      newCell.numFmt = '#0%'
+                    } else if (colNumber === 7 && rowNumber > 2){
+                      AUCellG2Sum += cell.value;
+                      newCell.value = cell.value;
+                      newCell.numFmt = cell.numFmt;
+                    } else if (colNumber === 8 && rowNumber > 2){
+                      newCell.value = parseFloat(cell.value.slice(0, -1)) / 100;
+                      newCell.numFmt = '#0.00%'
+                    } else if (colNumber === 9 && rowNumber > 2){
+                      newCell.value = parseFloat(cell.value.slice(1));
+                      newCell.numFmt = '$#0.00'
+                    } else {
+                      newCell.value = cell.value;
+                      newCell.numFmt = cell.numFmt;
+                    }
+                  });
+                }
               });
+
+              if (businessReportEmpty === false){
+                AUCellFResult = AUCellF2Summ/AUCellF2Divider;
+              }
+
+              lastWeekReportWorksheet.getRow(2).getCell(6).value = { formula: "AVERAGE(F3:F1048576)", result: AUCellFResult };
+              lastWeekReportWorksheet.getRow(2).getCell(7).value = { formula: "SUM(G3:G1048576)", result: AUCellG2Sum };
+
+              lastWeekReportWorksheet.addConditionalFormatting({
+                ref: 'F2:F1200',
+                rules: [
+                  {
+                    type: 'colorScale',
+                    cfvo: [{type: "min", value: 0}, {type: "percentile", value: 50}, {type: "max", value: 0}],
+                    color: [{argb: "FFF8696B"}, {argb: "FFFFEB84"}, {argb: "FF63BE7B"}],
+                  }
+                ]
+              });
+
+              //Set column widths
+              inputWeeklyReportWorkbook.getWorksheet(AUSheetNameToCopy).getRow(1).eachCell((cell, colNumber) => {
+                lastWeekReportWorksheet.getColumn(colNumber).width = inputWeeklyReportWorkbook.getWorksheet(AUSheetNameToCopy).getColumn(colNumber).width;
+              })
 
               //Copy the Amazon Data sheet
               const outputAmazonDataWorksheet = outputWeeklyReportWorkbook.addWorksheet(worksheet.name);
 
               outputAmazonDataWorksheet.model = worksheet.model;
               outputAmazonDataWorksheet.state = worksheet.state;
+              
+              outputAmazonDataWorksheet.getColumn('A').eachCell((cell, rowNumber) => {
+                newRowNumberAmazonData++;
+              });
 
               businessReportWorksheet.spliceColumns(10, 1);
               
               //Copy the business report data into the Amazon Data sheet
-              businessReportWorksheet.eachRow((row, rowNumber) => {
-                if (rowNumber > 2) {
-                  let wholesalePriceValue, costsOfGoodsSoldValue;
-                  
-                  function calculateWholeSalePrice() {
-                    inputWeeklyReportWorkbook.getWorksheet('Inventory').getColumn('C').eachCell((cell, rowNumber) => {
-                      if(cell.value === row.getCell('C').value){
-                        wholesalePriceValue = inputWeeklyReportWorkbook.getWorksheet('Inventory').getRow(rowNumber).getCell('AF').value;
+              //If there are no fields to copy, add a row with a date in the first column
+              if (businessReportEmpty === true) {
+                const rowValues = [];
+                rowValues[1] = new Date(year, month, saturday, 2, 0, 0);
+                rowValues[7] = 0; 
+                rowValues[10] = 0;
+                rowValues[11] = { formula: "IFERROR(VLOOKUP(D" + newRowNumberAmazonData + ",Inventory!C:AF,30,FALSE),0)", result: 0 };
+                rowValues[12] = { formula: 'K' + newRowNumberAmazonData + '*H' + newRowNumberAmazonData, result: 0 };
+
+                outputAmazonDataWorksheet.spliceRows(newRowNumberAmazonData, 0, rowValues);
+              } else {
+                businessReportWorksheet.eachRow((row, rowNumber) => {
+                  if (rowNumber > 2) {
+                    let wholesalePriceValue, costsOfGoodsSoldValue;
+                    
+                    function calculateWholeSalePrice() {
+                      inputWeeklyReportWorkbook.getWorksheet('Inventory').getColumn('C').eachCell((cell, rowNumber) => {
+                        if(cell.value === row.getCell('C').value){
+                          wholesalePriceValue = inputWeeklyReportWorkbook.getWorksheet('Inventory').getRow(rowNumber).getCell('AF').value;
+                        }
+                      });
+                    }
+
+                    const rowValues = [];
+                    rowValues[1] = new Date(year, month, saturday, 2, 0, 0);
+                    row.eachCell((cell, colNumber) => {
+                      if(colNumber === 6) {
+                        rowValues[colNumber + 1] = parseInt(cell.value.slice(0, -1)) / 100;
+                      } else if (colNumber === 8) {
+                        rowValues[colNumber + 1] = parseFloat(cell.value.slice(0, -1)) / 100;
+                      } else if (colNumber === 9) {
+                        rowValues[colNumber + 1] = parseFloat(cell.value.slice(1));
+                      } else {
+                        rowValues[colNumber + 1] = cell.value;
                       }
                     });
+
+                    calculateWholeSalePrice();
+                    costsOfGoodsSoldValue = wholesalePriceValue * rowValues[8];
+                    
+                    //rowValues[1] = { formula: "DATEVALUE(\"3/1/2001\")", result: 36951 };
+                    rowValues[11] = { formula: "IFERROR(VLOOKUP(D" + newRowNumberAmazonData + ",Inventory!C:AF,30,FALSE),0)", result: wholesalePriceValue };
+                    rowValues[12] = { formula: 'K' + newRowNumberAmazonData + '*H' + newRowNumberAmazonData, result: costsOfGoodsSoldValue };
+
+                    outputAmazonDataWorksheet.spliceRows(newRowNumberAmazonData, 1, rowValues);
+                    newRowNumberAmazonData++;
                   }
-
-                  const rowValues = [];
-                  rowValues[1] = new Date(year, month, saturday+1)
-                  row.eachCell((cell, colNumber) => {
-                    if(colNumber === 6) {
-                      rowValues[colNumber + 1] = parseInt(cell.value.slice(0, -1)) / 100;
-                    } else if (colNumber === 8) {
-                      rowValues[colNumber + 1] = parseFloat(cell.value.slice(0, -1)) / 100;
-                    } else if (colNumber === 9) {
-                      rowValues[colNumber + 1] = parseFloat(cell.value.slice(1));
-                    } else {
-                      rowValues[colNumber + 1] = cell.value;
-                    }
-                  });
-
-                  calculateWholeSalePrice();
-                  costsOfGoodsSoldValue = wholesalePriceValue * rowValues[8];
-
-                  //rowValues[1] = { formula: "DATEVALUE(\"3/1/2001\")", result: 36951 };
-                  rowValues[11] = { formula: "VLOOKUP(D" + rowNumber + ",Inventory!C:AF,30,FALSE)", result: wholesalePriceValue };
-                  rowValues[12] = { sharedFormula: 'L2', result: wholesalePriceValue * rowValues[8] };
-
-                  outputAmazonDataWorksheet.addRow(rowValues);
-                }
-              });
+                });
+              }
 
               outputAmazonDataWorksheet.getColumn(1).numFmt = 'd-mmm';
+              outputAmazonDataWorksheet.getColumn(7).numFmt = '#0%';
+              outputAmazonDataWorksheet.getColumn(9).numFmt = '#0.00%';
+              //Accounting number format
+              outputAmazonDataWorksheet.getColumn(10).numFmt = '_($* #,##0.00_);_($* (#,##0.00);_($* "-"??_);_(@_)';
+              outputAmazonDataWorksheet.getColumn(11).numFmt = '_($* #,##0.00_);_($* (#,##0.00);_($* "-"??_);_(@_)';
+              outputAmazonDataWorksheet.getColumn(12).numFmt = '_($* #,##0.00_);_($* (#,##0.00);_($* "-"??_);_(@_)';
+              // outputAmazonDataWorksheet.getColumn(10).numFmt = '$#0.00';
+              // outputAmazonDataWorksheet.getColumn(11).numFmt = '$#0.00';
+              // outputAmazonDataWorksheet.getColumn(12).numFmt = '$#0.00';
 
               return;
             }
@@ -293,18 +400,9 @@ businessReportSubmit.addEventListener('click', async (event) => {
 
             outputWeeklyReportWorksheet.model = worksheet.model;
             outputWeeklyReportWorksheet.state = worksheet.state;
-
-            // worksheet.eachRow((row, rowNumber) => {
-            //   var newRow = outputWeeklyReportWorksheet.getRow(rowNumber);
-            //   row.eachCell((cell, colNumber) => {
-            //     var newCell = newRow.getCell(colNumber);
-            //     newCell.model = cell.model;
-            //     newCell.numFmt = cell.numFmt;
-            //   });
-            // });
           });
 
-          //Update SKU sheet
+          //Update the SKU sheet
           let skuWorksheet = outputWeeklyReportWorkbook.getWorksheet('SKU Week by Week Growth');
           let newColumnNumber = skuWorksheet.getRow(1).cellCount + 1;
           let newColumnLetter = skuWorksheet.getColumn(newColumnNumber).letter;
@@ -313,7 +411,7 @@ businessReportSubmit.addEventListener('click', async (event) => {
           //Create the first, date cell for the new column
           skuWorksheet.getRow(1).getCell(newColumnNumber).model = skuWorksheet.getRow(1).getCell(newColumnNumber - 1).model;
           skuWorksheet.getRow(1).getCell(newColumnNumber).value = { formula: previousColumnLetter + "1+7",
-          result: outputWeeklyReportWorkbook.getWorksheet('Amazon Data').lastRow.getCell(1).value, shareType: 'shared', ref: newColumnLetter + '1:BX1' } 
+          result: outputWeeklyReportWorkbook.getWorksheet('Amazon Data').getRow(newRowNumberAmazonData).getCell(1).value } 
           skuWorksheet.getRow(1).getCell(newColumnNumber).numFmt = 'd-mmm'
 
           //Add the new column data
@@ -341,7 +439,166 @@ businessReportSubmit.addEventListener('click', async (event) => {
             }
           });
 
-          await outputWeeklyReportWorkbook.xlsx.writeFile(companyName + '.xlsx');
+
+          //Update the Overview sheet
+          const overviewOutputWorksheet = outputWeeklyReportWorkbook.getWorksheet('Overview');
+          let newRowNumberOverview = 1;
+          overviewOutputWorksheet.getColumn('A').eachCell((cell, rowNumber) => {
+            newRowNumberOverview++;
+          });
+          let newRowValues = [];
+          let overviewNewRowDateValue = monthValues[monthAWeekAgo + 1] + ' ' + sundayAWeekAgo + ' - ' + monthValues[month + 1] + ' ' + saturday;
+          let columnSevenResult = 0, columnEightResult = 0, columnNineResult = 0, columnElevenResult = 0, amazonDataFirstRow = 1, amazonDataLastRow = newRowNumberAmazonData,
+          cellO3 = 0, cellO4 = 0, cellO5 = 0, cellO6 = 0, cellO7 = 0, cellO7Summ = 0, cellO7Divider = 1, cellO8 = 0;
+
+          newRowValues[1] = overviewNewRowDateValue;
+          newRowValues[2] = '';
+          newRowValues[3] = '';
+          newRowValues[4] = '';
+          newRowValues[5] = '';
+          newRowValues[10] = '';
+
+          //Include the value for Actual Purchases and Units Purchased in the Overview sheet if they have been entered in the input fields
+          if (companyName === 'Kong') {
+              if (actualPurchasesValueKong.value) {
+                newRowValues[2] = parseFloat(actualPurchasesValueKong.value);
+              }
+              if (unitsPurchasedValueKong.value) {
+                newRowValues[4] = parseFloat(unitsPurchasedValueKong.value);
+              }
+            } else if (companyName === 'Formula Sports') {
+              if (actualPurchasesValueFormulaSports.value) {
+                newRowValues[2] = parseFloat(actualPurchasesValueFormulaSports.value);
+              }
+              if (unitsPurchasedValueFormulaSports.value) {
+                newRowValues[4] = parseFloat(unitsPurchasedValueFormulaSports.value);
+              }
+            } else if (companyName === 'Rapid Loss') {
+              if (actualPurchasesValueRapidLoss.value) {
+                newRowValues[2] = parseFloat(actualPurchasesValueRapidLoss.value);
+              }
+              if (unitsPurchasedValueRapidLoss.value) {
+                newRowValues[4] = parseFloat(unitsPurchasedValueRapidLoss.value);
+              }
+            } else if (companyName === 'Skin Physics') {
+              if (actualPurchasesValueSkinPhysics.value) {
+                newRowValues[2] = parseFloat(actualPurchasesValueSkinPhysics.value);
+              }
+              if (unitsPurchasedValueSkinPhysics.value) {
+                newRowValues[4] = parseFloat(unitsPurchasedValueSkinPhysics.value);
+              }
+            }
+
+          newRowValues[6] = overviewNewRowDateValue;
+
+          //Calculate the Sessions value for the formula field
+          outputWeeklyReportWorkbook.getWorksheet(lastWeekWorksheetName).getColumn('D').eachCell((cell, rowNumber) => {
+            if (rowNumber > 2){
+              columnSevenResult += cell.value;
+            }
+          });
+
+          newRowValues[7] = { formula: "SUM('" + lastWeekWorksheetName + "'!D:D)", result: columnSevenResult };
+
+          //Calculate the AU Traffic Actual Sales value for the formula field
+          outputWeeklyReportWorkbook.getWorksheet(lastWeekWorksheetName).getColumn('I').eachCell((cell, rowNumber) => {
+            if (rowNumber > 2){
+              columnEightResult += cell.value;
+            }
+          });
+
+          newRowValues[8] = { formula: "SUM('" + lastWeekWorksheetName + "'!I:I)", result: columnEightResult };
+
+          //Calculate the Amazon Data Actual Sales value for the formula field
+          outputWeeklyReportWorkbook.getWorksheet('Amazon Data').getColumn('L').eachCell((cell, rowNumber) => {
+            if (cell.value === null) {
+              return;
+            }
+            const cellValue = outputWeeklyReportWorkbook.getWorksheet('Amazon Data').getRow(rowNumber).getCell('A').value;
+            const timeValue = new Date(cellValue).getTime();
+            if (timeValue === new Date(year, month, saturday, 2, 0, 0).getTime()){
+              if (amazonDataFirstRow === 1) {
+                amazonDataFirstRow = rowNumber;
+              }
+              if (cell.value.result) {
+                columnNineResult += cell.value.result;
+              }
+            }
+          });
+
+          newRowValues[9] = { formula: "SUM('Amazon Data'!L" + amazonDataFirstRow + ":L" + amazonDataLastRow + ")", result: columnNineResult };
+
+          //Calculate the Amazon Units Sold value for the formula field
+          columnElevenResult = outputWeeklyReportWorkbook.getWorksheet(lastWeekWorksheetName).getRow(2).getCell('G').value.result;
+
+          newRowValues[11] = { formula: "'" + lastWeekWorksheetName + "'!G2", result: columnElevenResult};
+
+          overviewOutputWorksheet.spliceRows(newRowNumberOverview, 1, newRowValues)
+          //overviewOutputWorksheet.addRow(newRowValues);
+
+          overviewOutputWorksheet.getRow(newRowNumberOverview).eachCell((cell, colNumber) => {
+            cell.style = overviewOutputWorksheet.getRow(newRowNumberOverview - 1).getCell(colNumber).style;
+            cell.numFmt = overviewOutputWorksheet.getRow(newRowNumberOverview - 1).getCell(colNumber).numFmt;
+          })
+
+          //Calculate column O cell values
+          cellO3 = new Date(year, month, saturday, 2, 0, 0);
+          
+          //Calculate the cell O4 value for the formula field
+          outputWeeklyReportWorkbook.getWorksheet('Amazon Data').getColumn('E').eachCell((cell, rowNumber) => {
+            const cellValue = outputWeeklyReportWorkbook.getWorksheet('Amazon Data').getRow(rowNumber).getCell('A').value;
+            const timeValue = new Date(cellValue).getTime();
+            if (timeValue === new Date(year, month, saturday, 2, 0, 0).getTime()){
+              cellO4 += cell.value;
+            }
+          });
+
+          //Calculate the cell O5 value for the formula field
+          outputWeeklyReportWorkbook.getWorksheet('Amazon Data').getColumn('H').eachCell((cell, rowNumber) => {
+            const cellValue = outputWeeklyReportWorkbook.getWorksheet('Amazon Data').getRow(rowNumber).getCell('A').value;
+            const timeValue = new Date(cellValue).getTime();
+            if (timeValue === new Date(year, month, saturday, 2, 0, 0).getTime()){
+              cellO5 += cell.value;
+            }
+          });
+
+          //Calculate the cell O6 value for the formula field
+          outputWeeklyReportWorkbook.getWorksheet('Amazon Data').getColumn('J').eachCell((cell, rowNumber) => {
+            const cellValue = outputWeeklyReportWorkbook.getWorksheet('Amazon Data').getRow(rowNumber).getCell('A').value;
+            const timeValue = new Date(cellValue).getTime();
+            if (timeValue === new Date(year, month, saturday, 2, 0, 0).getTime()){
+              cellO6 += cell.value;
+            }
+          });
+
+          //Calculate the cell O7 value for the formula field
+          outputWeeklyReportWorkbook.getWorksheet('Amazon Data').getColumn('G').eachCell((cell, rowNumber) => {
+            const cellValue = outputWeeklyReportWorkbook.getWorksheet('Amazon Data').getRow(rowNumber).getCell('A').value;
+            const timeValue = new Date(cellValue).getTime();
+            if (timeValue === new Date(year, month, saturday, 2, 0, 0).getTime()){
+              cellO7Summ += cell.value;
+              cellO7Divider ++;
+            }
+          });
+
+          cellO7 = cellO7Summ/cellO7Divider;
+
+          if (columnNineResult !== 0) {
+            cellO8 = (columnEightResult - columnNineResult)/columnEightResult
+          }
+
+          overviewOutputWorksheet.getCell('O3').value = cellO3;
+          overviewOutputWorksheet.getCell('O4').value = { formula: "SUMIFS('Amazon Data'!E:E,'Amazon Data'!A:A,Overview!O3)", result: cellO4 }
+          overviewOutputWorksheet.getCell('O5').value = { formula: "SUMIFS('Amazon Data'!H:H,'Amazon Data'!A:A,Overview!O3)", result: cellO5 }
+          overviewOutputWorksheet.getCell('O6').value = { formula: "SUMIFS('Amazon Data'!J:J,'Amazon Data'!A:A,Overview!O3)", result: cellO6 }
+          overviewOutputWorksheet.getCell('O7').value = { formula: "AVERAGEIFS('Amazon Data'!G:G,'Amazon Data'!A:A,Overview!O3)", result: cellO7 }
+          overviewOutputWorksheet.getCell('O8').value = { formula: "(H" + newRowNumberOverview + "-I" + newRowNumberOverview + ")/H" + newRowNumberOverview, result: cellO8 }
+
+          //Delete the helper businessReport file
+          fs.unlinkSync(filePaths.businessReportFilePath + 'encoding.csv');
+
+          let title = companyName + ' AU Weekly Report ' + sundayAWeekAgo + '.' + (monthAWeekAgo + 1) + '.' + String(yearAWeekAgo).slice(0, 2) + ' - ' + saturday + '.' + (month + 1) + '.' + String(year).slice(0, 2);
+          await outputWeeklyReportWorkbook.xlsx.writeFile(title + '.xlsx', {});
 
         }).then(function () {
           alert(companyName + ' weekly report successfully processed');
@@ -501,7 +758,4 @@ skinPhysicsWeeklyFile.addEventListener('click', function (event) {
 skinPhysicsInventoryFile.addEventListener('click', function (event) {
   ipcRenderer.send('open-skinPhysics-inventory');
 });
-
-
-
 
