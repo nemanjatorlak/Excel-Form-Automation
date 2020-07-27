@@ -1,23 +1,51 @@
 body {
-  background: wheat;
-}
-
-.row {
-  -webkit-transition: all 2s ease-in-out;
-  -moz-transition: all 2s ease-in-out;
-  -o-transition: all 2s ease-in-out;
-  -ms-transition: all 2s ease-in-out;
-  transition: all 2s ease-in-out;
-}
-
-.no-padding {
-  left: 5%;
-}
-
-#buttonDiv {
-  -webkit-transition: all 2s ease-in-out;
-  -moz-transition: all 2s ease-in-out;
-  -o-transition: all 2s ease-in-out;
-  -ms-transition: all 2s ease-in-out;
-  transition: all 2s ease-in-out;
-}
+    background: wheat;
+  }
+  
+  .row {
+    -webkit-transition: all 2s ease-in-out;
+    -moz-transition: all 2s ease-in-out;
+    -o-transition: all 2s ease-in-out;
+    -ms-transition: all 2s ease-in-out;
+    transition: all 2s ease-in-out;
+  }
+  
+  .no-padding {
+    left: 5%;
+  }
+  
+  #buttonDiv {
+    -webkit-transition: all 2s ease-in-out;
+    -moz-transition: all 2s ease-in-out;
+    -o-transition: all 2s ease-in-out;
+    -ms-transition: all 2s ease-in-out;
+    transition: all 2s ease-in-out;
+  }
+  
+  .sector {
+    padding-top: 2%;
+  }
+  
+  .inputTitleRow {
+    padding-top: 2%;
+  }
+  
+  .fileRow {
+    padding-top: 2%;
+  }
+  
+  .firstLine {
+    height: 2px;
+    background-color: red;
+    margin-top: 2%;
+    margin-bottom: 2%;
+    border-width: 0;
+  }
+  
+  .lineBreak {
+    height: 2px;
+    background-color: brown;
+    margin-top: 2%;
+    margin-bottom: 2%;
+    border-width: 0;
+  }
