@@ -13,7 +13,7 @@
   "author": "Nemanja Torlak",
   "license": "ISC",
   "dependencies": {
-    "electron": "^9.0.0",
+    "electron": "^15.5.5",
     "electron-packager": "^15.0.0",
     "exceljs": "^3.9.0",
     "fast-csv": "^4.3.0",
